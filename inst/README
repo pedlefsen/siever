@@ -1,0 +1,161 @@
+Notes on the various tools and decisions and procedures used to create sieve package.
+
+1) Initially following Hadley Wickham's guidelines that start on 
+
+   http://adv-r.had.co.nz/Philosophy.html 
+
+   These are somewhat vague, and I wish there were an "Idiot's Guide to R Package Creation"
+   but many useful packages seem to have cropped up or have been drastically improved in
+   the last year.  These include knitr, RStudio, Roxygen2, testthat and several others.  
+   Most of these documents are written as if the reader were intimately familiar with
+   other documents. For example, the knitr "manual" is mostly a description of how knitr
+   differs from Sweave.  This file will document my jagged path through all the tools,
+   and which decisions I have made.
+
+   Throughout this, I am constructing a package to house Afshin's version of the sieve
+   package that Paul initially created.
+
+   I am taking the gold standard for package structure and content to be:
+
+      http://cran.fhcrc.org/doc/manuals/R-exts.html#Creating-R-packages
+
+
+2) Per Wickham's suggested naming conventions, I am calling the package siever.
+
+3) Use rstudio to create initial skeleton.
+
+   File -> New Project -> Directory ...
+   Edit Description.
+      Arbitrarily choose GPL-2.  
+      Obtain license from  http://www.R-project.org/Licenses/ put it in the
+        ...share/licenses directory.
+      Test to see what other packages may be loaded by tStat_alt.R -- for
+         the "requires" field of the description.  Source tStat_alt.R, look
+         at search().  [No new packages.]
+      Test to see what other packages may be loaded by test_tStat_alt.R --
+         for the "suggests" field of the description.  Run test.  Look at
+         search().  NO testthat package?  Is this really a "test" qua R
+         packages?
+      
+         NOTE: "convert.env.to.matrix" is required by tStat_alt.R.  This 
+         routine is in Afshin's version of sequence_util.R. (Not Paul's)
+         
+         Moving convert.env.to.matrix into tStat_alt.  Nothing essentially 
+         to do with "sequences".
+
+         NOTE: sequence_util should probably be its own package.
+
+         Run ONLY the tStat_alt part of tStat_alt_test.  Do not include
+         "sources".  See what fails.  -- Result:  Only readFastaFile
+         is required to run test.  Not required for core routines.
+      Edit NAMESPACE file.  Only export tStat.alt and tStat.alt.wrapper.
+      Try building.  FAIL.  
+      Put titles into help files.  Succeeds.  Puts package into my library.
+         Gotta get the gz file.
+      Create tests directory.  Create a test-all.R routine per 
+         http://adv-r.had.co.nz/Testing.html
+      Must put S3 methods into NAMESPACE file.
+      NOTE: the file environment for the tests in R CMD check is the same
+         as the environment for the .R files.
+      DESCRIPTION SUGGESTS "testthat"
+
+4) R CMD install siever --install-tests
+   Must contain the --install-tests option if you plan to use scripts or 
+   data in the tests directory after installation.
+
+***************  
+
+Paul's notes
+
+Sieve R package
+
+Status
+ - Nov 18: Dedided not to use Python.
+ - Plan interface
+ - design issues
+   - Thread safety
+     - Message: keep in mind (raise a flag) if our design is cornering us into shared memory.
+     - Just vectorization?  Just embarassingly parallelizable?  Do we need to worry about multi-processing (not-memory-shared) in addition to multicore?
+     - multicore for Windoze
+   - Passing by reference
+     - Craig and Ted can locate some pass-by-reference package(s)
+ - profiling [Afshin will look into this]
+   - call tracing to determine what is called in a GWJ run
+   - profiling for optimization: to do cursorily for now
+ - sequence.util.R
+   - consider using library( "seqinr" )
+   - "readFasta" is actually "readAlignedFasta"
+
+Marching orders:
+ - Afshin will do some profiling of GWJ
+ - Ted will learn about Package-izing (according to CRAN and Bioconductor) [talk to Dave Swan], using seqinr, and "collect important observations for modifying the code to meet standards"
+
+
+Scope
+ - count-only methods
+   - GWJ, SMMB, MBS (not 454)
+   - Physicochemical properties (matrices already made)
+     *) Start with just GWJ
+ [maybe someday, but not now:
+   - "454" versions of the above
+   - t-test GWJ
+   - f-test GWJ (nonparametric)
+ - count-and-overall-efficacy methods
+   - FAF
+ - count-and-failure-time methods
+   - GSA
+ - efficiency (maybe C callouts)
+ ]
+
+Bioconductor requirements (the code repository)
+  - Do they require that we use bioconductor biostrings etc? NO
+  - Do they require or advise about input/output formats and parameter I/O? NO
+  - http://www.bioconductor.org/developers/how-to/
+
+Interface requirements
+  - parameter I/O
+    - Spreadsheet ala existing testing code
+    - Use an existing pipeline file format? eg ACE
+
+Documentation
+   - Use Doxygen (in R, Roxygen)?  Or for Python there's also Sphinx and pydoc (todo: check these out, compare).
+   - R: Rd is the standard way; http://cran.r-project.org/doc/manuals/R-exts.html#Rd-format
+   - warnings/scope
+   - vignettes
+   - use cases  
+
+Testing
+  - Bioconductor: see http://www.bioconductor.org/developers/how-to/unitTesting-guidelines/
+  - statistical (size)
+  - regression tests (Afshin already wrote these for R)
+  - unit tests (use RUnit and PyUnit)
+
+Software engineering
+  - profiling existing code: see http://cran.r-project.org/doc/manuals/R-exts.html#Tidying-and-profiling-R-code
+  - Break apart multiple-option functions?
+    - Decision: several multipurpose fns under-hood (duplication ok), not accessible
+      publicly; public-access fns are tested thoroughly but under-hood
+      alternate paths are not.
+  - Pass/attach environments?
+  - Should we use biostrings, etc?
+  - other
+
+Code best practices
+  - CRAN has a best practices doc (Ted will locate)
+  - Style issues:
+    * dot-names
+    * parameter names and orders
+    * data/object types
+    * comment style
+    * use of external libraries
+    * general
+  - Style guides:
+    * Google:  http://google-styleguide.googlecode.com/svn/trunk/Rguide.xml
+    * Bioconductor: http://www.bioconductor.org/developers/how-to/coding-style/
+    * Bengtsson (@ UC-Berkeley):  https://docs.google.com/document/d/1esDVxyWvH8AsX-VJa-8oqWaHLs4stGlIbk8kLc5VlII/edit
+    * Hadley (in NZ):  http://adv-r.had.co.nz/Style.html
+  - An interesting study about the inconsistent use of naming conventions in R packages on CRAN, worth reading:
+    http://journal.r-project.org/archive/2012-2/RJournal_2012-2_Baaaath.pdf
+
+
+FDA audit requirements

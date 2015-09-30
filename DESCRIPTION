@@ -1,0 +1,18 @@
+Package: siever
+Type: Package
+Title: Sieve analysis methods per Gilbert, Wu, Jobes (2008)
+Version: 0.6
+Date: 2014-02-04
+Author: Afshin Mashadi-Hossein <amashadi@fhcrc.org>, Paul Edlefsen
+    <pedlefse@fhcrc.org>, Ted Holzman <tholzman@fhcrc.org>
+Maintainer: Ted Holzman <tholzman@fhcrc.org>
+Description: This package contains R routines to implement the sieve analysis
+    methods first described in Gilbert, Wu, Jobes (2008).  These methods are
+    designed to examine the constraining effect of a vaccine on viral genomes.
+License: file LICENSE | GPL-2
+Depends:
+    seqinr
+Suggests:
+    testthat (>= 0.8.1)
+biocViews: sieve analysis, bioinformatics
+Packaged: 2014-01-24 00:40:51 UTC; tedholzman

@@ -1,0 +1,7 @@
+import(seqinr)
+export(GWJsieve)
+export(GWJsieve.wrapper)
+export(dataWeights)
+export(get.variable.sites)
+export(permutation.options)
+export(weightopt)
