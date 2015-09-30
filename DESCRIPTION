@@ -9,7 +9,7 @@ Maintainer: Ted Holzman <tholzman@fredhutch.org>
 Description: This package contains R routines to implement the sieve analysis
     methods first described in Gilbert, Wu, Jobes (2008).  These methods are
     designed to examine the constraining effect of a vaccine on viral genomes.
-License: file LICENSE | GPL-2
+License: file LICENSE | MIT
 Depends:
     seqinr
 Suggests:
